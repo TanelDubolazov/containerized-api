@@ -1,0 +1,109 @@
+version: "3.8"
+
+services:
+  # Inventory Database
+  inventory-db:
+    image: postgres:15-alpine
+    container_name: inventory-db
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB_MOVIES}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - inventory-data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  # Billing Database
+  billing-db:
+    image: postgres:15-alpine
+    container_name: billing-db
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB_ORDERS}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - billing-data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  # RabbitMQ (Messaging Queue)
+  rabbit-queue:
+    image: rabbitmq:3-management
+    container_name: rabbit-queue
+    restart: always
+    ports:
+      - "15672:15672"  # RabbitMQ management UI
+      - "5672:5672"    # AMQP (Messaging Protocol)
+    networks:
+      - backend
+
+  # Inventory App (API)
+  inventory-app:
+    build: ./srcs/inventory-app
+    container_name: inventory-app
+    restart: always
+    depends_on:
+      - inventory-db
+    environment:
+      DB_HOST: ${DB_HOST_INVENTORY}
+      DB_PORT: ${DB_PORT_INVENTORY}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASS: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB_MOVIES}
+    ports:
+      - "8080:8080"
+    networks:
+      - backend
+
+  # Billing App (API)
+  billing-app:
+    build: ./srcs/billing-app
+    container_name: billing-app
+    restart: always
+    depends_on:
+      - billing-db
+      - rabbit-queue
+    environment:
+      DB_HOST: ${DB_HOST_BILLING}
+      DB_PORT: ${DB_PORT_BILLING}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASS: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB_ORDERS}
+      RABBITMQ_HOST: ${RABBITMQ_URL}
+      QUEUE_NAME: ${QUEUE_NAME}
+    ports:
+      - "8081:8081"
+    networks:
+      - backend
+
+  # API Gateway
+  api-gateway:
+    build: ./srcs/api-gateway
+    container_name: api-gateway
+    restart: always
+    depends_on:
+      - inventory-app
+      - billing-app
+    environment:
+      INVENTORY_API_URL: ${INVENTORY_API_URL}
+      BILLING_API_URL: ${BILLING_API_URL}
+      RABBITMQ_URL: ${RABBITMQ_URL}  # Use RABBITMQ_URL from .env
+    ports:
+      - "3000:3000"
+    networks:
+      - backend
+    volumes:
+      - api-gateway-logs:/app/logs
+
+# Volumes for persistent storage
+volumes:
+  inventory-data:
+  billing-data:
+  api-gateway-logs:
+
+# Docker network configuration
+networks:
+  backend:
