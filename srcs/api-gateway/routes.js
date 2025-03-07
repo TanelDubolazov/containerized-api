@@ -3,8 +3,8 @@ const amqp = require("amqplib");
 
 const router = express.Router();
 
-const QUEUE_NAME = process.env.QUEUE_NAME || "billing_queue";
-const RABBITMQ_URL = process.env.RABBITMQ_URL || "amqp://localhost";
+const QUEUE_NAME = process.env.QUEUE_NAME;
+const RABBITMQ_URL = process.env.RABBITMQ_URL;
 
 router.post("/", async (req, res) => {
   try {

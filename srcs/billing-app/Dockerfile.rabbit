@@ -1,0 +1,7 @@
+FROM rabbitmq:3.12-alpine
+
+# Enable RabbitMQ Management Plugin
+RUN rabbitmq-plugins enable --offline rabbitmq_management
+
+
+EXPOSE 5672 15672

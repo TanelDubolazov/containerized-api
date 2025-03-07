@@ -29,16 +29,23 @@ services:
     networks:
       - backend
 
-  # RabbitMQ (Messaging Queue)
+   # RabbitMQ (Messaging Queue)
   rabbit-queue:
-    image: rabbitmq:3-management
     container_name: rabbit-queue
+    build:
+      context: ./srcs/billing-app 
+      dockerfile: Dockerfile.rabbit 
+    environment:
+       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
     restart: always
     ports:
-      - "15672:15672"  # RabbitMQ management UI
-      - "5672:5672"    # AMQP (Messaging Protocol)
+      - "15672:15672"  
+      - "5672:5672"    
     networks:
       - backend
+
+
 
   # Inventory App (API)
   inventory-app:
@@ -53,8 +60,7 @@ services:
       DB_USER: ${POSTGRES_USER}
       DB_PASS: ${POSTGRES_PASSWORD}
       DB_NAME: ${POSTGRES_DB_MOVIES}
-    ports:
-      - "8080:8080"
+      PORT: 8080   # Force inventory app to listen on 8080 internally
     networks:
       - backend
 
@@ -79,7 +85,7 @@ services:
     networks:
       - backend
 
-  # API Gateway
+  # API Gateway - the only service exposed externally
   api-gateway:
     build: ./srcs/api-gateway
     container_name: api-gateway
@@ -88,9 +94,10 @@ services:
       - inventory-app
       - billing-app
     environment:
-      INVENTORY_API_URL: ${INVENTORY_API_URL}
+      INVENTORY_API_URL: ${INVENTORY_API_URL}  # Should point to http://inventory-app:8080
       BILLING_API_URL: ${BILLING_API_URL}
-      RABBITMQ_URL: ${RABBITMQ_URL}  # Use RABBITMQ_URL from .env
+      RABBITMQ_URL: ${RABBITMQ_URL}
+      PORT: 3000   # API Gateway listens on 3000
     ports:
       - "3000:3000"
     networks:

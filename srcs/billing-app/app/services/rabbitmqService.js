@@ -10,6 +10,7 @@ async function consumeMessages() {
     const channel = await connection.createChannel();
 
     await channel.assertQueue(QUEUE_NAME);
+    conseole.log(connection)
     console.log(`Waiting for messages in queue: ${QUEUE_NAME}`);
 
     channel.consume(QUEUE_NAME, async (message) => {

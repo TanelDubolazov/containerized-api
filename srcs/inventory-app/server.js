@@ -3,7 +3,7 @@ require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
 
 const express = require("express");
 const bodyParser = require("body-parser");
-const sequelize = require("./app/config/database");
+const sequelize = require("./app/config/database"); 
 const movieRoutes = require("./app/routes/movieRoutes");
 
 const app = express();
