@@ -64,7 +64,6 @@ RABBITMQ_PASSWORD=guest
 
 ```
 
-**Important:** Never commit your `.env` file to version control. The `.env` file is included in `.gitignore`.
 
 ## Setup Instructions
 
