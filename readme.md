@@ -7,7 +7,6 @@ This project implements a microservices architecture using Docker containers for
 
 -   [Architecture Overview](#architecture-overview)
 -   [Prerequisites](#prerequisites)
--   [Project Structure](#project-structure)
 -   [Configuration](#configuration)
 -   [Setup Instructions](#setup-instructions)
 -   [Running the Application](#running-the-application)
@@ -34,10 +33,6 @@ The application consists of the following microservices:
 -   Docker 
 -   Docker Compose
 -   Git
-
-## Project Structure
-
-The project structure is organized as follows:
 
 
 ## Configuration
